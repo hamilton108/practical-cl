@@ -1,6 +1,9 @@
 (defun hello-world ()
   (format t "Hello, World dude!"))
 
+;; (ql:add-to-init-file)
+;; (ql:update-dist "quicklisp")
+
 (ql:quickload "cl-csv")
 
 (defvar *db* nil)
