@@ -32,3 +32,10 @@
   (with-open-file (in fname)
     (with-standard-io-syntax 
       (setf *db* (read in)))))
+
+(defun lc ()
+  (cl-csv:read-csv 
+    #P"gpsx.csv" 
+    :separator ";"
+    :map-fn #'(lambda (row)
+                (print (nth 0 row)))))
