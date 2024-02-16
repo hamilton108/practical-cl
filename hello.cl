@@ -33,9 +33,34 @@
     (with-standard-io-syntax 
       (setf *db* (read in)))))
 
-(defun lc ()
-  (cl-csv:read-csv 
-    #P"gpsx.csv" 
-    :separator ";"
-    :map-fn #'(lambda (row)
-                (print (nth 0 row)))))
+(defun lc2 ()
+  (let ((x 
+          (cl-csv:read-csv 
+            #P"gpsx.csv" 
+            :separator ";")))
+  (nth 0 (first (rest x)))))
+
+(defun gpsx-dict ()
+  (let* 
+    ((y (make-hash-table :test 'equal))
+     (x 
+        (cl-csv:read-csv 
+          #P"gpsx.csv" 
+            :separator ";"
+            :map-fn #'(lambda (row) 
+                        (let ((key (nth 0 row)))
+                          (setf (gethash key y) row))))))
+    y))
+
+(defparameter my-hash (gpsx-dict))
+
+(defun demo ()
+  (let ((dx (gpsx-dict)))
+    (gethash "191:4:5" dx)))
+
+(defun print-hash-entry (key value)
+    (format t "The value associated with the key ~S is ~S~%"
+            key value))
+
+(defun demo2 ()
+  (maphash #'print-hash-entry my-hash))
