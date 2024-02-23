@@ -5,6 +5,7 @@
 ;(ql:quickload "alexandria")
 (ql:quickload "str")
 (ql:quickload "cl-ppcre")
+;(ql:quickload "recur")
 
 (defun delimiterp (c) (char= c #\_))
 
@@ -52,7 +53,7 @@
 
 (defun populate-ht (ht)
   (cl-csv:read-csv 
-    #P"gpsx2.csv" 
+    #P"gpsx.csv" 
       :separator ";"
       :map-fn #'(lambda (row) 
                   (let ((key (nth 0 row)))
@@ -66,7 +67,7 @@
 
 (defparameter my-hash (gpsx-dict))
 
-(defparameter papp-jpgs "azure_papp2_jpgs")
+(defparameter papp-jpgs "azure_papp2_jpgs_full")
 
 (defun papp-items ()
   (map 'list #'my-split 
@@ -92,16 +93,40 @@
   (let* ((key (make-key item))
          (gpsx (gethash key my-hash)))
     (if gpsx 
-      (setf (getf item :gpsx) (nth 3 gpsx)))
+      (setf (getf item :gpsx) (nth 4 gpsx)))
     item))
 
+(defun assign-photo-num (items &optional (acc 1))
+  (if (not (null items))
+    (let ((item (first items)))
+      (setf (getf item :photo) acc)
+      (assign-photo-num (rest items) (+ acc 1)))))
+
 (defun demo3 ()
-  (let 
-    ((items (map 'list #'make-photo (papp-items))))
-    (map 'list #'assign-gpsx items)))
+  (let*
+    ((items (map 'list #'make-photo (papp-items)))
+     (gpsx-items (map 'list #'assign-gpsx items)))
+     (assign-photo-num gpsx-items)
+     gpsx-items))
 
 
 (defun ab (a b c) (* a b c))
 
+(defparameter curry-fn 
+  (curry #'ab 10 20))
+
 (defun curry-demo ()
-  (funcall (curry #'ab 10 20) 30))
+  ;(map 'list (lambda (x) (funcall curry-fn x)) (list 3 30)))
+  (map 'list 
+    (lambda (x) (funcall (curry #'ab 10 20) x)) 
+    (list 3 30 1 34 2343 3)))
+
+(defun fac-t (n &optional (acc 1))
+  (if (<= n 1)
+      acc
+      (fac-t (- n 1) (* n acc))))
+
+(defun fac (n)
+  (if (<= n 1)
+      1
+      (* n (fac (- n 1)))))
